@@ -1,31 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-
+using Microsoft.UpdateServices.Administration;
 namespace WSUSDeclineUpdates
 {
-    using System;
-    using System.Xml;
-
-    using Microsoft.UpdateServices.Administration;
-
     class Program
     {
         static void Main(string[] args)
         {
-            IUpdateServer server = AdminProxy.GetUpdateServer("ltpatches.theabfm.org", true, 8443);
+            //Create IUpdateServer variable and connect to WSUS Server
 
+            //replace the "REPLACETHIS" with your WSUS Server Name, SSL or NOT, and Port. Syntax here is (SERVERNAME, REQUIRESSL, PORT)
+            IUpdateServer server = AdminProxy.GetUpdateServer("REPLACETHIS", true, 443);
+
+            //Begin loop thru updates and filter updates to just unapproved updates from beginning of time to current time
             foreach (IUpdate update in server.GetUpdates(ApprovedStates.NotApproved, DateTime.MinValue, DateTime.MaxValue, null, null))
             {
+                //Convert UpdateType to string for comparison in following if statement
                 string updatetype = update.UpdateType.ToString();
-                if(false == update.IsDeclined && false == update.IsApproved && updatetype == "Driver")
+
+                //Filter for driver updates only
+                if (updatetype == "Driver")
                 {
+                    //Write update name to console
+                    Console.WriteLine("Declining update {0}", update.Title);
+                    //Decline driver update
                     update.Decline();
-                    Console.WriteLine("\n{0} \n {1}",update.Title,update.UpdateType);
+                    //Write confimation to console
+                    Console.WriteLine("Update Successfully Declined");
                 }
-                
+
             }
 
 
